@@ -1,24 +1,77 @@
 import { Component, Input, OnInit, ViewEncapsulation } from "@angular/core";
 import * as d3 from "d3";
-import { HierarchyPointNode } from "d3";
+//import { HierarchyPointNode } from "d3";
+
+//import * as d3 from 'd3-selection';
+import * as d3Scale from 'd3-scale';
+import * as d3Array from 'd3-array';
+import * as d3Axis from 'd3-axis';
 
 export const margin = { top: 20, right: 120, bottom: 20, left: 120 };
 export const width = 960 - margin.right - margin.left;
 export const height = 800 - margin.top - margin.bottom;
 
 @Component({
-    selector: "mapper",
-    template: "<svg></svg>",
+    selector: "app-mapper",
+    templateUrl: "mapper.component.html",
     styleUrls: ["mapper.component.css"],
     providers: [],
     encapsulation: ViewEncapsulation.None,
 })
 export class MapperComponent implements OnInit {
-    private svg;
+    private svg: any;
     private treeLayout;
     private root;
+    title = 'D3 tree with Angular 8';
+    width: number;
+  height: number;
+  margin = { top: 20, right: 20, bottom: 30, left: 40 };
+  x: any;
+  y: any;
+  g: any;   
 
-    ngOnInit() {
+   constructor() {
+   //this.width = 900 - this.margin.left - this.margin.right;
+   //this.height = 500 - this.margin.top - this.margin.bottom;
+     this.width = 450 - this.margin.left - this.margin.right;
+     this.height = 250 - this.margin.top - this.margin.bottom;
+  }
+
+   ngOnInit() {
+    this.initSvg();
+    //this.initAxis();
+    //this.drawAxis();
+    this.drawTree();
+  }
+
+    initSvg() {
+    this.svg = d3.select('#tree')
+      .append('svg')
+      //.attr('width', '100%')
+      //.attr('height', '100%')
+      .attr("width", this.width + this.margin.right + this.margin.left)
+      .attr("height", this.height + this.margin.top + this.margin.bottom)
+      //.attr('viewBox', '0 0 900 500');
+      .attr('viewBox', '0 0 '+this.width+' '+this.height);
+    this.g = this.svg.append('g')
+      .attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
+  }
+
+  drawTree() {
+  /***
+    this.g.selectAll('.bar')
+      .data(StatsBarChart)
+      .enter().append('rect')
+      .attr('class', 'bar')
+      .attr('x', (d) => this.x(d.company))
+      .attr('y', (d) => this.y(d.frequency))
+      .attr('width', this.x.bandwidth())
+      .attr('height', (d) => this.height - this.y(d.frequency));
+      ***/
+  }
+
+  ngOnInitOLD() {
+        /**
         d3.json("../../assets/flare.json").then(data => {
 
             this.root = d3.hierarchy(data, (d) => d.children);
@@ -36,7 +89,8 @@ export class MapperComponent implements OnInit {
             this.root.children.forEach(collapse);
 
             this.update(this.root);
-        });
+	    });
+	    **/
 
         this.svg = d3.select("svg")
             .attr("width", width + margin.right + margin.left)

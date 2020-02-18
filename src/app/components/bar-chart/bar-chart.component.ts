@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { StatsBarChart } from '../../assets/data/data';
+import { StatsBarChart } from '../../../assets/data/data';
 
 import * as d3 from 'd3-selection';
 import * as d3Scale from 'd3-scale';
@@ -10,7 +10,7 @@ import * as d3Axis from 'd3-axis';
 @Component({
   selector: 'app-bar-chart',
   templateUrl: './bar-chart.component.html',
-  styleUrls: ['./bar-chart.component.scss'],
+  styleUrls: ['./bar-chart.component.css'],
 })
 export class BarChartComponent implements OnInit {
 

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { StatsPieChart } from '../../assets/data/data';
+import { StatsPieChart } from '../../../assets/data/data';
 import * as d3 from 'd3-selection';
 import * as d3Scale from 'd3-scale';
 import * as d3Shape from 'd3-shape';
@@ -7,7 +7,7 @@ import * as d3Shape from 'd3-shape';
 @Component({
   selector: 'app-pie-chart',
   templateUrl: './pie-chart.component.html',
-  styleUrls: ['./pie-chart.component.scss'],
+  styleUrls: ['./pie-chart.component.css'],
 })
 export class PieChartComponent implements OnInit {
 
