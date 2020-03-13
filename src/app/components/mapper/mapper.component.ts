@@ -1,114 +1,194 @@
-import { Component, Input, OnInit, ViewEncapsulation } from "@angular/core";
-import * as d3 from "d3";
-//import { HierarchyPointNode } from "d3";
+// V2 from https://stackoverflow.com/questions/47256258/collapsible-trees-in-typescript-and-d3-version-v3
 
-//import * as d3 from 'd3-selection';
-import * as d3Scale from 'd3-scale';
-import * as d3Array from 'd3-array';
-import * as d3Axis from 'd3-axis';
+import { Component, Inject, OnInit } from '@angular/core';
+ import { Http } from '@angular/http';
+ import {
+     hierarchy,
+     HierarchyNode,
+     HierarchyPointNode,
+     HierarchyLink,
+     HierarchyPointLink,
+     StratifyOperator,
+     TreeLayout,
+     tree,
+     ClusterLayout,
+     cluster
+ } from 'd3-hierarchy'
+ import * as d3 from 'd3';
+ import { forEach } from '@angular/router/src/utils/collection';
 
-export const margin = { top: 20, right: 120, bottom: 20, left: 120 };
-export const width = 960 - margin.right - margin.left;
-export const height = 800 - margin.top - margin.bottom;
-
+import { Node, Link, MapTree } from '../../models'
+import { MapTreeService } from '../../service/map-tree.service'
+ 
+ interface HierarchyDatum {
+     name: string;
+     value: number;
+     children?: Array<HierarchyDatum>;
+ }
+ const data: HierarchyDatum = {
+     name: "A1",
+     value: 100,
+     children: [
+         {
+             name: "B1",
+             value: 100,
+             children: [
+                 {
+                     name: "C1",
+                     value: 100,
+                     children: undefined 
+                 },
+                 {
+                     name: "C2",
+                     value: 300,
+                     children: [
+                         {
+                             name: "D1",
+                             value: 100,
+                             children: undefined
+                         },
+                         {
+                             name: "D2",
+                             value: 300,
+                             children: undefined
+                         }
+                     ] 
+                 },
+                 {
+                     name: "C3",
+                     value: 200,
+                     children: undefined 
+                 }
+             ]
+         },
+         {
+             name: "B2",
+             value: 200,
+             children: [
+                 {
+                     name: "C4",
+                     value: 100,
+                     children: undefined 
+                 },
+                 {
+                     name: "C5",
+                     value: 300,
+                     children: undefined 
+                 },
+                 {
+                     name: "C6",
+                     value: 200,
+                     children: [
+                         {
+                             name: "D3",
+                             value: 100,
+                             children: undefined
+                         },
+                         {
+                             name: "D4",
+                             value: 300,
+                             children: undefined
+                         }
+                     ]  
+                 }
+             ]
+         }
+     ]
+ };
 @Component({
     selector: "app-mapper",
     templateUrl: "mapper.component.html",
     styleUrls: ["mapper.component.css"],
-    providers: [],
-    encapsulation: ViewEncapsulation.None,
+    //providers: [],
+    //encapsulation: ViewEncapsulation.None,
 })
 export class MapperComponent implements OnInit {
-    private svg: any;
-    private treeLayout;
-    private root;
-    title = 'D3 tree with Angular 8';
-    width: number;
-  height: number;
-  margin = { top: 20, right: 20, bottom: 30, left: 40 };
-  x: any;
-  y: any;
-  g: any;   
+     private margin: any = { top: 20, right: 120, bottom: 20, left: 120 };
+     private width: number;
+     private height: number;
+     private root: HierarchyPointNode<HierarchyDatum>;
+     private tree: TreeLayout<HierarchyDatum>;
+     private svg: any;
+     private diagonal: any;
+    title = 'D3 tree with Angular 8 v2.2';
 
-   constructor() {
-   //this.width = 900 - this.margin.left - this.margin.right;
-   //this.height = 500 - this.margin.top - this.margin.bottom;
-     this.width = 450 - this.margin.left - this.margin.right;
-     this.height = 250 - this.margin.top - this.margin.bottom;
-  }
+     constructor() {
+     //this.width = 450 - this.margin.left - this.margin.right;
+     //this.height = 250 - this.margin.top - this.margin.bottom;
+     }
 
-   ngOnInit() {
-    this.initSvg();
-    //this.initAxis();
-    //this.drawAxis();
-    this.drawTree();
-  }
-
-    initSvg() {
-    this.svg = d3.select('#tree')
-      .append('svg')
-      //.attr('width', '100%')
-      //.attr('height', '100%')
-      .attr("width", this.width + this.margin.right + this.margin.left)
-      .attr("height", this.height + this.margin.top + this.margin.bottom)
+     ngOnInit() {
+     /***
+    this.mapTreeService.$data.subscribe(data => {
+       this.data = data;
+       });
+       ***/
+         this.width = 720 - this.margin.right - this.margin.left;
+         this.height = 640 - this.margin.top - this.margin.bottom;
+	 //this.svg = d3.select('.container').append("svg")
+	 this.svg = d3.select('#tree').append('svg')
+             .attr("width", this.width + this.margin.right + this.margin.left)
+             .attr("height", this.height + this.margin.top + this.margin.bottom)
       //.attr('viewBox', '0 0 900 500');
-      .attr('viewBox', '0 0 '+this.width+' '+this.height);
-    this.g = this.svg.append('g')
-      .attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
-  }
+      //.attr('viewBox', '0 0 '+this.width+' '+this.height);
+             .append("g")
+             .attr("class", "g")
+             //.attr("transform", "translate(5,5)");
+	     //this.g = this.svg.append('g')
+             .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
+         d3.select('svg g.g')
+             .append("g")
+             .attr("class", "links");
+         d3.select('svg g.g')
+             .append("g")
+             .attr("class", "nodes");
+         console.log("flare inside", data);
+         this.tree = tree<HierarchyDatum>();
+         this.tree.size([this.height, this.width]);
+         this.root = this.tree(hierarchy<HierarchyDatum>(data));
+         this.draw(this.root);
+     }
 
-  drawTree() {
-  /***
-    this.g.selectAll('.bar')
-      .data(StatsBarChart)
-      .enter().append('rect')
-      .attr('class', 'bar')
-      .attr('x', (d) => this.x(d.company))
-      .attr('y', (d) => this.y(d.frequency))
-      .attr('width', this.x.bandwidth())
-      .attr('height', (d) => this.height - this.y(d.frequency));
-      ***/
-  }
+     private draw(root: HierarchyPointNode<HierarchyDatum>) {
+         // Nodes
+         d3.select('svg g.nodes')
+             .selectAll('circle.node')
+             .data(root.descendants())
+             .enter()
+             .append('circle')
+             .classed('node', true)
+             .attr('style', "fill: steelblue;stroke: #ccc;stroke-width: 3px;")
+             .attr('cx', function (d) { return d.x; })
+             .attr('cy', function (d) { return d.y; })
+             .attr('r', 10);
+         // Links
+         d3.select('svg g.links')
+             .selectAll('line.link')
+             .data(root.links())
+             .enter()
+             .append('line')
+             .classed('link', true)
+             .attr('style', "stroke: #ccc;stroke-width: 3px;")
+             .attr('x1', function (d) { return d.source.x; })
+             .attr('y1', function (d) { return d.source.y; })
+             .attr('x2', function (d) { return d.target.x; })
+             .attr('y2', function (d) { return d.target.y; });
+     }
 
-  ngOnInitOLD() {
-        /**
-        d3.json("../../assets/flare.json").then(data => {
 
-            this.root = d3.hierarchy(data, (d) => d.children);
-            this.root.x0 = height / 2;
-            this.root.y0 = 0;
-
-            let collapse = function (d) {
-                if (d.children) {
-                    d._children = d.children;
-                    d._children.forEach(collapse);
-                    d.children = null;
-                }
-            }    
-
-            this.root.children.forEach(collapse);
-
-            this.update(this.root);
-	    });
-	    **/
-
-        this.svg = d3.select("svg")
-            .attr("width", width + margin.right + margin.left)
-            .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top                     + ")");
-
-    this.treeLayout = d3.tree().size([height, width]);
-
-}
-
-update(source) {
+/*** OLD STUFF =============================================
+ update(source) {
     let i = 0;
     let duration = 750;
 
-    let treeData = this.treeLayout(this.root);
+    //let treeData = this.treeLayout(source);
+    //let treeData = this.treeLayout;
+    let treeData = source;
+    console.log(treeData)
     let nodes = treeData.descendants();
+    console.log(nodes)
     let links = treeData.descendants().slice(1);
+    console.log(links)
 
     nodes.forEach(d => d.y = d.depth * 180);
 
@@ -127,9 +207,9 @@ update(source) {
 
     let nodeUpdate = nodeEnter.merge(node);
 
-    nodeUpdate.transition()
-        .duration(duration)
-        .attr("transform", d => "translate(" + d.y + "," + d.x + ")");
+    //nodeUpdate.transition()
+    //    .duration(duration)
+    //    .attr("transform", d => "translate(" + d.y + "," + d.x + ")");
 
     nodeUpdate.select("circle.node")
         .attr("r", 10)
@@ -159,11 +239,11 @@ update(source) {
     
     let linkUpdate = linkEnter.merge(link);
 
-    linkUpdate.transition()
-        .duration(duration)
-        .attr("d", d => {
-            return this.diagonal(d, d.parent)
-        });
+    //linkUpdate.transition()
+    //    .duration(duration)
+    //    .attr("d", d => {
+    //        return this.diagonal(d, d.parent)
+    //    });
 
     let linkExit = link.exit().transition()
         .duration(duration)
@@ -192,6 +272,54 @@ click(d) {
     this.update(d);
 }
 
+  initOLD() {
+        
+  //d3.json('../../assets/flare.json').then(data => {
+  //d3.json('../../assets/flare.json').then(function(data) {
+
+  //console.log(data)
+	//this.root = d3.hierarchy(data, (d) => d.children);
+	//this.root = d3.hierarchy(data);
+	//this.root2 = d3.hierarchy({
+	var root3 = d3.hierarchy({
+           name: "root",
+           children: [
+              {name: "child #1"},
+              {
+                  name: "child #2",
+                  children: [
+                     {name: "grandchild #1"},
+                     {name: "grandchild #2"},
+                     {name: "grandchild #3"}
+                  ]
+              }
+	      ],
+	      x0: 0,
+	      y0: 0
+	   });
+
+	//this.root2 = root3
+        root3.x0 = height / 2;
+        root3.y0 = 0;
+
+        let collapse = function (d) {
+            if (d.children) {
+                d._children = d.children;
+                d._children.forEach(collapse);
+                d.children = null;
+            }
+        }    
+
+        root3.children.forEach(collapse);
+
+        this.update(root3);
+	//     });
+	    
+
+
+     this.treeLayout = d3.tree().size([height, width]);
+   }
+
 diagonal(s, d) {
     let path = `M ${s.y} ${s.x}
             C ${(s.y + d.y) / 2} ${s.x},
@@ -200,5 +328,6 @@ diagonal(s, d) {
 
     return path;
     }
+    ***/
 }
 
