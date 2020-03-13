@@ -1,4 +1,4 @@
-// V2 from https://stackoverflow.com/questions/47256258/collapsible-trees-in-typescript-and-d3-version-v3
+// V2.2 from https://stackoverflow.com/questions/47256258/collapsible-trees-in-typescript-and-d3-version-v3
 
 import { Component, Inject, OnInit } from '@angular/core';
  import { Http } from '@angular/http';
