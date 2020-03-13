@@ -8,6 +8,9 @@ import { MapperComponent } from './components/mapper/mapper.component';
 import { PieChartComponent } from './components/pie-chart/pie-chart.component';
 import { BarChartComponent } from './components/bar-chart/bar-chart.component';
 
+import { MapTreeService } from './service/map-tree.service';
+
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -20,7 +23,7 @@ import { BarChartComponent } from './components/bar-chart/bar-chart.component';
     FormsModule,
     HttpModule
   ],
-  //providers: [],
+  providers: [MapTreeService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
