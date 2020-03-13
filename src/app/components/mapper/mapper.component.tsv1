@@ -1,0 +1,258 @@
+import { Component, Input, OnInit, ViewEncapsulation } from "@angular/core";
+import * as d3 from "d3";
+//import { HierarchyPointNode } from "d3";
+
+//import * as d3 from 'd3-selection';
+import * as d3Scale from 'd3-scale';
+import * as d3Array from 'd3-array';
+import * as d3Axis from 'd3-axis';
+//import * as d3Fetch from 'd3-fetch';
+//import * as d3Hierarchy from 'd3-hierarchy';
+import {hierarchy} from "d3-hierarchy";
+
+import { Node, Link, MapTree } from '../../models'
+import { MapTreeService } from '../../service/map-tree.service'
+
+export const margin = { top: 20, right: 120, bottom: 20, left: 120 };
+export const width = 960 - margin.right - margin.left;
+export const height = 800 - margin.top - margin.bottom;
+
+@Component({
+    selector: "app-mapper",
+    templateUrl: "mapper.component.html",
+    styleUrls: ["mapper.component.css"],
+    providers: [],
+    encapsulation: ViewEncapsulation.None,
+})
+export class MapperComponent implements OnInit {
+    private svg: any;
+    private treeLayout;
+    //private root: any;
+    //root2: any;
+    title = 'D3 tree with Angular 8';
+    width: number;
+  height: number;
+  margin = { top: 20, right: 20, bottom: 30, left: 40 };
+  x: any;
+  y: any;
+  g: any;
+  data: MapTree;
+  newLabel: string;
+  newValue: number;
+
+   constructor(private mapTreeService: MapTreeService) {
+   //this.width = 900 - this.margin.left - this.margin.right;
+   //this.height = 500 - this.margin.top - this.margin.bottom;
+     this.width = 450 - this.margin.left - this.margin.right;
+     this.height = 250 - this.margin.top - this.margin.bottom;
+  }
+
+  ngOnInit() {
+    this.mapTreeService.$data.subscribe(data => {
+       this.data = data;
+    });
+
+    this.initSvg();
+    //this.initAxis();
+    //this.drawAxis();
+    this.drawTree();
+    this.initOLD();
+  }
+
+    initSvg() {
+    this.svg = d3.select('#tree')
+      .append('svg')
+      //.attr('width', '100%')
+      //.attr('height', '100%')
+      .attr("width", this.width + this.margin.right + this.margin.left)
+      .attr("height", this.height + this.margin.top + this.margin.bottom)
+      //.attr('viewBox', '0 0 900 500');
+      .attr('viewBox', '0 0 '+this.width+' '+this.height);
+    this.g = this.svg.append('g')
+      .attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
+  }
+
+  drawTree() {
+  /***
+    this.g.selectAll('.bar')
+      .data(StatsBarChart)
+      .enter().append('rect')
+      .attr('class', 'bar')
+      .attr('x', (d) => this.x(d.company))
+      .attr('y', (d) => this.y(d.frequency))
+      .attr('width', this.x.bandwidth())
+      .attr('height', (d) => this.height - this.y(d.frequency));
+      ***/
+  }
+
+ update(source) {
+    let i = 0;
+    let duration = 750;
+
+    //let treeData = this.treeLayout(source);
+    //let treeData = this.treeLayout;
+    let treeData = source;
+    console.log(treeData)
+    let nodes = treeData.descendants();
+    console.log(nodes)
+    let links = treeData.descendants().slice(1);
+    console.log(links)
+
+    nodes.forEach(d => d.y = d.depth * 180);
+
+    let node = this.svg.selectAll("g.node")
+        .data(nodes, d =>  d.id || (d.id = ++i) );
+
+    let nodeEnter = node.enter().append("g")
+        .attr("class", "node")
+        .attr("transform", d => "translate(" + source.y0 + "," + source.x0 + ")")
+        .on("click", this.click.bind(this));
+
+    nodeEnter.append("circle")
+        .attr("class", "node")
+        .attr("r", 1e-6)
+        .style("fill", d => d._children ? "lightsteelblue" : "#fff");
+
+    let nodeUpdate = nodeEnter.merge(node);
+
+    //nodeUpdate.transition()
+    //    .duration(duration)
+    //    .attr("transform", d => "translate(" + d.y + "," + d.x + ")");
+
+    nodeUpdate.select("circle.node")
+        .attr("r", 10)
+        .style("fill", d => d._children ? "lightsteelblue" : "#fff")
+        .attr("cursor", "pointer");
+
+    let nodeExit = node.exit().transition()
+        .duration(duration)
+        .attr("transform", d => "translate(" + source.y + "," + source.x + ")")
+        .remove();
+
+    nodeExit.select("circle")
+        .attr("r", 1e-6);
+
+    nodeExit.select("text")
+        .style("fill-opacity", 1e-6);
+
+    let link = this.svg.selectAll("path.link")
+        .data(links, d => d.id);
+
+    let linkEnter = link.enter().insert("path", "g")
+        .attr("class", "link")
+        .attr("d", d => {
+            let o = { x: source.x0, y: source.y0 };
+            return this.diagonal(o, o);
+        });
+    
+    let linkUpdate = linkEnter.merge(link);
+
+    //linkUpdate.transition()
+    //    .duration(duration)
+    //    .attr("d", d => {
+    //        return this.diagonal(d, d.parent)
+    //    });
+
+    let linkExit = link.exit().transition()
+        .duration(duration)
+        .attr("d", d => {
+            let o = { x: source.x, y: source.y };
+            return this.diagonal(o, o);
+        })
+        .remove();
+
+    nodes.forEach(d => {
+        d.x0 = d.x;
+        d.y0 = d.y;
+    });
+
+}
+
+click(d) {
+    if (d.children) {
+        d._children = d.children;
+        d.children = null;
+    } else {
+        d.children = d._children;
+        d._children = null;
+    }
+
+    this.update(d);
+}
+
+  initOLD() {
+        
+  //d3.json('../../assets/flare.json').then(data => {
+  //d3.json('../../assets/flare.json').then(function(data) {
+
+  //console.log(data)
+	//this.root = d3.hierarchy(data, (d) => d.children);
+	//this.root = d3.hierarchy(data);
+	//this.root2 = d3.hierarchy({
+	var root3 = d3.hierarchy({
+           name: "root",
+           children: [
+              {name: "child #1"},
+              {
+                  name: "child #2",
+                  children: [
+                     {name: "grandchild #1"},
+                     {name: "grandchild #2"},
+                     {name: "grandchild #3"}
+                  ]
+              }
+	      ],
+	      x0: 0,
+	      y0: 0
+	   });
+
+	//this.root2 = root3
+        root3.x0 = height / 2;
+        root3.y0 = 0;
+
+        let collapse = function (d) {
+            if (d.children) {
+                d._children = d.children;
+                d._children.forEach(collapse);
+                d.children = null;
+            }
+        }    
+
+        root3.children.forEach(collapse);
+
+        this.update(root3);
+	//     });
+	    
+
+     /***
+     this.svg = d3.select("svg")
+         .attr("width", width + margin.right + margin.left)
+         .attr("height", height + margin.top + margin.bottom)
+         .append("g")
+         .attr("transform", "translate(" + margin.left + "," + margin.top                     + ")");
+     ***/
+
+     this.treeLayout = d3.tree().size([height, width]);
+   }
+
+diagonal(s, d) {
+    let path = `M ${s.y} ${s.x}
+            C ${(s.y + d.y) / 2} ${s.x},
+              ${(s.y + d.y) / 2} ${d.x},
+              ${d.y} ${d.x}`
+
+    return path;
+    }
+
+    /***
+    addData(): void {
+      let newData = {
+        label: this.newLabel,
+        value: this.newValue
+      } as IData;
+
+      this.dataService.addData(newData);
+    }
+    ***/
+}
+
