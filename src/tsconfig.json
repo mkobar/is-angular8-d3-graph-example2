@@ -14,5 +14,9 @@
     "typeRoots": [
       "../node_modules/@types"
     ]
-  }
+  },
+  "exclude": [
+    "**/*.spec.ts",
+    "**/__mocks__"
+    ]
 }
