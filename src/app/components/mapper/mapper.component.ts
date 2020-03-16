@@ -1,4 +1,4 @@
-// V2.2 from https://stackoverflow.com/questions/47256258/collapsible-trees-in-typescript-and-d3-version-v3
+// V2.3 from https://stackoverflow.com/questions/47256258/collapsible-trees-in-typescript-and-d3-version-v3
 
 import { Component, Inject, OnInit } from '@angular/core';
  import { Http } from '@angular/http';
@@ -20,81 +20,12 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { Node, Link, MapTree } from '../../models'
 import { MapTreeService } from '../../service/map-tree.service'
  
- interface HierarchyDatum {
+interface HierarchyDatum {
      name: string;
      value: number;
+     r: number; // radius
      children?: Array<HierarchyDatum>;
- }
- const data: HierarchyDatum = {
-     name: "A1",
-     value: 100,
-     children: [
-         {
-             name: "B1",
-             value: 100,
-             children: [
-                 {
-                     name: "C1",
-                     value: 100,
-                     children: undefined 
-                 },
-                 {
-                     name: "C2",
-                     value: 300,
-                     children: [
-                         {
-                             name: "D1",
-                             value: 100,
-                             children: undefined
-                         },
-                         {
-                             name: "D2",
-                             value: 300,
-                             children: undefined
-                         }
-                     ] 
-                 },
-                 {
-                     name: "C3",
-                     value: 200,
-                     children: undefined 
-                 }
-             ]
-         },
-         {
-             name: "B2",
-             value: 200,
-             children: [
-                 {
-                     name: "C4",
-                     value: 100,
-                     children: undefined 
-                 },
-                 {
-                     name: "C5",
-                     value: 300,
-                     children: undefined 
-                 },
-                 {
-                     name: "C6",
-                     value: 200,
-                     children: [
-                         {
-                             name: "D3",
-                             value: 100,
-                             children: undefined
-                         },
-                         {
-                             name: "D4",
-                             value: 300,
-                             children: undefined
-                         }
-                     ]  
-                 }
-             ]
-         }
-     ]
- };
+}
 @Component({
     selector: "app-mapper",
     templateUrl: "mapper.component.html",
@@ -110,7 +41,92 @@ export class MapperComponent implements OnInit {
      private tree: TreeLayout<HierarchyDatum>;
      private svg: any;
      private diagonal: any;
-    title = 'D3 tree with Angular 8 v2.2';
+     private g: any;
+    title = 'D3 tree with Angular 8 v2.3';
+
+  data: HierarchyDatum = {
+     name: "A1",
+     value: 100,
+     r: 20,
+     children: [
+         {
+             name: "B1",
+             value: 100,
+	     r: 20,
+             children: [
+                 {
+                     name: "C1",
+		     value: 100,
+		     r: 20,
+                     children: undefined 
+                 },
+                 {
+                     name: "C2",
+                     value: 300,
+		     r: 20,
+                     children: [
+                         {
+                             name: "D1",
+                             value: 100,
+			     r: 20,
+                             children: undefined
+                         },
+                         {
+                             name: "D2",
+                             value: 300,
+			     r: 20,
+                             children: undefined
+                         }
+                     ] 
+                 },
+                 {
+                     name: "C3",
+                     value: 200,
+		     r: 20,
+                     children: undefined 
+                 }
+             ]
+         },
+         {
+             name: "B2",
+             value: 200,
+	     r: 40,
+             children: [
+                 {
+                     name: "C4",
+                     value: 100,
+		     r: 20,
+                     children: undefined 
+                 },
+                 {
+                     name: "C5",
+                     value: 300,
+		     r: 20,
+                     children: undefined 
+                 },
+                 {
+                     name: "C6",
+                     value: 200,
+		     r: 20,
+                     children: [
+                         {
+                             name: "D3",
+                             value: 100,
+			     r: 20,
+                             children: undefined
+                         },
+                         {
+                             name: "D4",
+                             value: 300,
+			     r: 20,
+                             children: undefined
+                         }
+                     ]  
+                 }
+             ]
+         }
+     ]
+ };
 
      constructor() {
      //this.width = 450 - this.margin.left - this.margin.right;
@@ -123,8 +139,18 @@ export class MapperComponent implements OnInit {
        this.data = data;
        });
        ***/
+
+       this.initSvg();
+       this.initTree();
+       //this.drawAxis();
+       //this.drawBars();
+	 this.drawTree(this.root);
+       }
+
+initSvg() {
          this.width = 720 - this.margin.right - this.margin.left;
-         this.height = 640 - this.margin.top - this.margin.bottom;
+	 this.height = 640 - this.margin.top - this.margin.bottom;
+
 	 //this.svg = d3.select('.container').append("svg")
 	 this.svg = d3.select('#tree').append('svg')
              .attr("width", this.width + this.margin.right + this.margin.left)
@@ -135,21 +161,28 @@ export class MapperComponent implements OnInit {
              .attr("class", "g")
              //.attr("transform", "translate(5,5)");
 	     //this.g = this.svg.append('g')
-             .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
+	     .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
+
          d3.select('svg g.g')
              .append("g")
              .attr("class", "links");
          d3.select('svg g.g')
              .append("g")
-             .attr("class", "nodes");
-         console.log("flare inside", data);
-         this.tree = tree<HierarchyDatum>();
-         this.tree.size([this.height, this.width]);
-         this.root = this.tree(hierarchy<HierarchyDatum>(data));
-         this.draw(this.root);
-     }
+	     .attr("class", "nodes");
+     } // initSvg
 
-     private draw(root: HierarchyPointNode<HierarchyDatum>) {
+    initTree() {
+         console.log("flare inside", this.data);
+         this.tree = tree<HierarchyDatum>();
+		 console.log(this.tree)
+         this.tree.size([this.height, this.width]);
+	 this.root = this.tree(hierarchy<HierarchyDatum>(this.data));
+		 console.log(this.root)
+	 //this.drawTree(this.root);
+     } // initTree
+
+     private drawTree(root: HierarchyPointNode<HierarchyDatum>) {
+	     /***
          // Nodes
          d3.select('svg g.nodes')
              .selectAll('circle.node')
@@ -160,7 +193,37 @@ export class MapperComponent implements OnInit {
              .attr('style', "fill: steelblue;stroke: #ccc;stroke-width: 3px;")
              .attr('cx', function (d) { return d.x; })
              .attr('cy', function (d) { return d.y; })
-             .attr('r', 10);
+	     .attr('r', 10);
+	     ***/
+
+	    
+         // active Node
+         this.g = d3.select('svg g.nodes')
+             .selectAll('circle.node')
+             .data(root.descendants())
+             .enter()
+	     .append('g')
+	     //.append('circle')
+	     //.classed('node', true)
+
+	     this.g.append('circle')
+             .attr('style', "fill: steelblue;stroke: #ccc;stroke-width: 3px;")
+             .attr('cx', function (d) { return d.x; })
+             .attr('cy', function (d) { return d.y; })
+	     //.attr('r', 20)
+	     .attr('r', function (d) { return d.data.r} )
+
+             this.g.append('text')
+	     .attr('class', 'query')
+	     //.attr('x', function (d) { return yearsTitleX[d]; })
+             .attr('x', function (d) { return d.x; })
+             .attr('y', function (d) { return d.y; })
+             .attr('font-size', '22px')
+             .attr('text-anchor', 'middle')
+	     //.text("node")
+             .text(d => d.data.name)
+	     //.text(function(d) { return d.name })
+
          // Links
          d3.select('svg g.links')
              .selectAll('line.link')
@@ -173,7 +236,7 @@ export class MapperComponent implements OnInit {
              .attr('y1', function (d) { return d.source.y; })
              .attr('x2', function (d) { return d.target.x; })
              .attr('y2', function (d) { return d.target.y; });
-     }
+	     } // draw
 
 
 /*** OLD STUFF =============================================
