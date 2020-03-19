@@ -24,6 +24,7 @@ interface HierarchyDatum {
      name: string;
      value: number;
      r: number; // radius
+     q: string; // query string
      children?: Array<HierarchyDatum>;
 }
 @Component({
@@ -47,34 +48,40 @@ export class MapperComponent implements OnInit {
   data: HierarchyDatum = {
      name: "A1",
      value: 100,
-     r: 20,
+     r: 40,
+     q: 'cars', // root
      children: [
          {
              name: "B1",
              value: 100,
 	     r: 20,
+	     q: 'old cars',
              children: [
                  {
                      name: "C1",
 		     value: 100,
 		     r: 20,
+		     q: 'old used cars',
                      children: undefined 
                  },
                  {
                      name: "C2",
                      value: 300,
 		     r: 20,
+		     q: 'old used trucks',
                      children: [
                          {
                              name: "D1",
                              value: 100,
 			     r: 20,
+			     q: 'old trucks',
                              children: undefined
                          },
                          {
                              name: "D2",
                              value: 300,
 			     r: 20,
+			     q: 'new trucks',
                              children: undefined
                          }
                      ] 
@@ -83,6 +90,7 @@ export class MapperComponent implements OnInit {
                      name: "C3",
                      value: 200,
 		     r: 20,
+		     q: 'vintage cars',
                      children: undefined 
                  }
              ]
@@ -90,35 +98,41 @@ export class MapperComponent implements OnInit {
          {
              name: "B2",
              value: 200,
-	     r: 40,
+	     r: 20,
+	     q: 'cars for sale',
              children: [
                  {
                      name: "C4",
                      value: 100,
 		     r: 20,
+		     q: 'old cars for sale',
                      children: undefined 
                  },
                  {
                      name: "C5",
                      value: 300,
 		     r: 20,
+		     q: 'used cars for sale',
                      children: undefined 
                  },
                  {
                      name: "C6",
                      value: 200,
 		     r: 20,
+		     q: 'new cars for sale',
                      children: [
                          {
                              name: "D3",
                              value: 100,
 			     r: 20,
+			     q: 'cars for rent',
                              children: undefined
                          },
                          {
                              name: "D4",
                              value: 300,
 			     r: 20,
+			     q: 'cars for lease',
                              children: undefined
                          }
                      ]  
@@ -182,7 +196,7 @@ initSvg() {
      } // initTree
 
      private drawTree(root: HierarchyPointNode<HierarchyDatum>) {
-	     /***
+     /***
          // Nodes
          d3.select('svg g.nodes')
              .selectAll('circle.node')
@@ -194,7 +208,7 @@ initSvg() {
              .attr('cx', function (d) { return d.x; })
              .attr('cy', function (d) { return d.y; })
 	     .attr('r', 10);
-	     ***/
+     ***/
 
 	    
          // active Node
@@ -212,9 +226,10 @@ initSvg() {
              .attr('cy', function (d) { return d.y; })
 	     //.attr('r', 20)
 	     .attr('r', function (d) { return d.data.r} )
+	     .on("click", this.click.bind(this));
 
-             this.g.append('text')
-	     .attr('class', 'query')
+	     this.g.append('text') // center
+	     .attr('class', 'name')
 	     //.attr('x', function (d) { return yearsTitleX[d]; })
              .attr('x', function (d) { return d.x; })
              .attr('y', function (d) { return d.y; })
@@ -223,6 +238,14 @@ initSvg() {
 	     //.text("node")
              .text(d => d.data.name)
 	     //.text(function(d) { return d.name })
+
+	     this.g.append('text') // center
+	     .attr('class', 'query')
+             .attr('x', function (d) { return d.x; })
+             .attr('y', function (d) { return d.y-20; })
+             .attr('font-size', '22px')
+             .attr('text-anchor', 'middle')
+             .text(d => d.data.q)
 
          // Links
          d3.select('svg g.links')
@@ -238,6 +261,23 @@ initSvg() {
              .attr('y2', function (d) { return d.target.y; });
 	     } // draw
 
+
+	     click(d) {
+	     /***
+    if (d.children) {
+        d._children = d.children;
+        d.children = null;
+    } else {
+        d.children = d._children;
+        d._children = null;
+	}
+	***/
+	d.data.r = 40
+    console.log("clicked =",d.data.name)
+    
+    this.drawTree(this.root);
+    //this.update(d);
+}
 
 /*** OLD STUFF =============================================
  update(source) {
