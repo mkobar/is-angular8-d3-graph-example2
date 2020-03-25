@@ -19,12 +19,12 @@ export const height = 800 - margin.top - margin.bottom;
 
 @Component({
     selector: "app-mapper",
-    templateUrl: "mapper.component.html",
-    styleUrls: ["mapper.component.css"],
+    templateUrl: "mapper2.component.html",
+    styleUrls: ["mapper2.component.css"],
     providers: [],
     encapsulation: ViewEncapsulation.None,
 })
-export class MapperComponent implements OnInit {
+export class Mapper2Component implements OnInit {
     private svg: any;
     private treeLayout;
     //private root: any;

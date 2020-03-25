@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 
 import { AppComponent } from './app.component';
-import { MapperComponent } from './components/mapper/mapper.component';
+import { Mapper2Component } from './components/mapper2/mapper2.component';
 import { PieChartComponent } from './components/pie-chart/pie-chart.component';
 import { BarChartComponent } from './components/bar-chart/bar-chart.component';
 
@@ -14,7 +14,7 @@ import { MapTreeService } from './service/map-tree.service';
 @NgModule({
   declarations: [
     AppComponent,
-    MapperComponent,
+    Mapper2Component,
     PieChartComponent,
     BarChartComponent
   ],
