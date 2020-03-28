@@ -215,7 +215,7 @@ export class Mapper2Component implements OnInit {
      console.log("root1.decendants() = ",root1.descendants())
      console.log("root1.links() = ",root1.links())
 	 // render loop here
-	 const render = (selection, { root2 }) => {
+	 const render = (selection, { root1 }) => {
 
            // active Node
            this.g = d3.select('svg g.nodes')
