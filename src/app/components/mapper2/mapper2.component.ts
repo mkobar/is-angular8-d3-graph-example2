@@ -214,22 +214,45 @@ export class Mapper2Component implements OnInit {
      console.log("root1 = ",root1)
      console.log("root1.decendants() = ",root1.descendants())
      console.log("root1.links() = ",root1.links())
+     let activeQuery = 2;
+     let lastActive = 0;
 	 // render loop here
 	 const render = (selection, { root1 }) => {
 
            // active Node
            this.g = d3.select('svg g.nodes')
              .selectAll('circle.node')
-             .data(root1.descendants())
-             .enter()
+	     .data(root1.descendants())
+
+           console.log("root1.decendants() = ",root1.descendants())
+
+	   const gEnter = this.g.enter()
 	     .append('g')
 
-	   this.g.append('circle')
+	   gEnter.append('circle')
              .attr('style', "fill: steelblue;stroke: #ccc;stroke-width: 3px;")
              .attr('cx', function (d) { return d.x; })
              .attr('cy', function (d) { return d.y; })
 	     //.attr('r', 20)
-	     .attr('r', function (d) { return d.data.r} )
+	     .merge(this.g)
+	     //.attr('r', function (d) { return d.data.r} )
+	     .attr('r', function (d) {
+	       console.log("d.data.r=",d.data.r);
+	       return d.data.r} )
+	     /***
+	     .attr('r', function (d,i) {
+	     if (i === activeQuery) {
+	        console.log("i=",i);
+		console.log("activeQuery=", activeQuery);
+	        return 40;
+		//} else {
+		}
+	     if (i === lastActive) {
+	        console.log("i2=",i);
+	        return 20;
+		}
+		})
+		***/
 	     //.on("click", this.clickOn.bind(this));
 	     .on("click", clickOn.bind(this));
 
@@ -244,13 +267,33 @@ export class Mapper2Component implements OnInit {
 	     //.text(function(d) { return d.name })
 	     ***/
 
-	     this.g.append('text') // center
+	     gEnter.append('text') // center
 	     .attr('class', 'query')
              .attr('x', function (d) { return d.x; })
              .attr('y', function (d) { return d.y-20; })
              .attr('font-size', '22px')
              .attr('text-anchor', 'middle')
-             .text(d => d.data.q)
+	     .text(d => d.data.q)
+
+	     // UPDATE
+             var gUpdate = gEnter.merge(this.g);
+	     /***
+	     const gUpdate = this.g
+	     .attr('r', function (d) { return d.data.r} )
+	     **/
+	     /***
+     	     .attr('r', function (d,i) {
+             if (i === activeQuery) {
+	        console.log("i3=",i);
+		console.log("activeQuery3=", activeQuery);
+	        return 40;
+	      } else {
+	        console.log("i4=",i);
+	        return 20;
+		}})
+		***/
+
+	      //const gExit = this.g.exit().transition().remove()
 
            // Links
            d3.select('svg g.links')
@@ -260,20 +303,27 @@ export class Mapper2Component implements OnInit {
              .append('line')
              .classed('link', true)
              .attr('style', "stroke: #ccc;stroke-width: 3px;")
-             .attr('x1', function (d) { return d.source.x; })
-             .attr('y1', function (d) { return d.source.y; })
-             .attr('x2', function (d) { return d.target.x; })
-             .attr('y2', function (d) { return d.target.y; });
+	     .attr('x1', function (d) { return d.source.x; })
+	     .attr('y1', function (d) { return d.source.y; })
+	     .attr('x2', function (d) { return d.target.x; })
+	     .attr('y2', function (d) { return d.target.y; });
 
 	 } // eo render
 
-	 const clickOn = (d) => {
-        d.data.r = 40
-        console.log("clicked =",d.data.name)
-	//render(this.svg, {this.root});
-	render(this.svg, {root1});
-        //this.drawTree(this.root);
-        //this.update(d);
+	 const clickOn = (d, i, n) => {
+	   d.data.r = 40
+	   console.log("clicked =",d.data.name)
+	   lastActive = activeQuery;
+	   activeQuery = i;
+	   //root1.descendants()[i].Node.data.r = 20;
+	   root1.descendants()[lastActive].data.r = 20;
+	   console.log("old-clicked =",root1.descendants()[lastActive].data.name)
+           console.log("root1.decendants() = ",root1.descendants())
+           console.log("root1 = ",root1)
+	   //render(this.svg, {this.root});
+	   render(this.svg, {root1});
+           //this.drawTree(this.root);
+           //this.update(d);
 	} // clickOn
 
 	render(this.svg, {root1}); // first time
