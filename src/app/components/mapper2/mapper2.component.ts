@@ -25,6 +25,7 @@ interface HierarchyDatum {
      value: number;
      r: number; // radius
      q: string; // query string
+     results: boolean; // does it have results?
      children?: Array<HierarchyDatum>;
 }
 @Component({
@@ -43,25 +44,28 @@ export class Mapper2Component implements OnInit {
      private svg: any;
      private diagonal: any;
      private g: any;
-    title = 'D3 tree with Angular 8 v2.3';
+    title = 'D3 tree with Angular 8 v2.4';
 
   data: HierarchyDatum = {
      name: "A1",
      value: 100,
      r: 40,
      q: 'cars', // root
+     results: true,
      children: [
          {
              name: "B1",
              value: 100,
 	     r: 20,
 	     q: 'old cars',
+	     results: true,
              children: [
                  {
                      name: "C1",
 		     value: 100,
 		     r: 20,
 		     q: 'old used cars',
+	             results: false,
                      children: undefined 
                  },
                  {
@@ -69,12 +73,14 @@ export class Mapper2Component implements OnInit {
                      value: 300,
 		     r: 20,
 		     q: 'old used trucks',
+	             results: false,
                      children: [
                          {
                              name: "D1",
                              value: 100,
 			     r: 20,
 			     q: 'old trucks',
+	                     results: false,
                              children: undefined
                          },
                          {
@@ -82,6 +88,7 @@ export class Mapper2Component implements OnInit {
                              value: 300,
 			     r: 20,
 			     q: 'new trucks',
+	                     results: false,
                              children: undefined
                          }
                      ] 
@@ -91,6 +98,7 @@ export class Mapper2Component implements OnInit {
                      value: 200,
 		     r: 20,
 		     q: 'vintage cars',
+	             results: false,
                      children: undefined 
                  }
              ]
@@ -100,12 +108,14 @@ export class Mapper2Component implements OnInit {
              value: 200,
 	     r: 20,
 	     q: 'cars for sale',
+	     results: false,
              children: [
                  {
                      name: "C4",
                      value: 100,
 		     r: 20,
 		     q: 'old cars for sale',
+		     results: false,
                      children: undefined 
                  },
                  {
@@ -113,6 +123,7 @@ export class Mapper2Component implements OnInit {
                      value: 300,
 		     r: 20,
 		     q: 'used cars for sale',
+		     results: false,
                      children: undefined 
                  },
                  {
@@ -120,12 +131,14 @@ export class Mapper2Component implements OnInit {
                      value: 200,
 		     r: 20,
 		     q: 'new cars for sale',
+		     results: false,
                      children: [
                          {
                              name: "D3",
                              value: 100,
 			     r: 20,
 			     q: 'cars for rent',
+			     results: false,
                              children: undefined
                          },
                          {
@@ -133,6 +146,7 @@ export class Mapper2Component implements OnInit {
                              value: 300,
 			     r: 20,
 			     q: 'cars for lease',
+			     results: false,
                              children: undefined
                          }
                      ]  
@@ -156,8 +170,6 @@ export class Mapper2Component implements OnInit {
 
        this.initSvg();
        this.initTree();
-       //this.drawAxis();
-       //this.drawBars();
        this.drawTree(this.root);
      }
 
@@ -193,29 +205,16 @@ export class Mapper2Component implements OnInit {
          this.tree.size([this.height, this.width]);
 	 this.root = this.tree(hierarchy<HierarchyDatum>(this.data));
          console.log(this.root)
-	 //this.drawTree(this.root);
      } // initTree
 
      private drawTree(root1: HierarchyPointNode<HierarchyDatum>) {
-     /***
-         // Nodes
-         d3.select('svg g.nodes')
-             .selectAll('circle.node')
-             .data(root1.descendants())
-             .enter()
-             .append('circle')
-             .classed('node', true)
-             .attr('style', "fill: steelblue;stroke: #ccc;stroke-width: 3px;")
-             .attr('cx', function (d) { return d.x; })
-             .attr('cy', function (d) { return d.y; })
-	     .attr('r', 10);
-     ***/
 
-     console.log("root1 = ",root1)
-     console.log("root1.decendants() = ",root1.descendants())
-     console.log("root1.links() = ",root1.links())
-     let activeQuery = 0;
-     let lastActive = 0;
+         console.log("root1 = ",root1)
+         console.log("root1.decendants() = ",root1.descendants())
+	 console.log("root1.links() = ",root1.links())
+
+         let activeQuery = 0;
+         let lastActive = 0;
 	 // render loop here
 	 const render = (selection, { root1 }) => {
 
@@ -226,11 +225,19 @@ export class Mapper2Component implements OnInit {
 
            console.log("root1.decendants() = ",root1.descendants())
 
+	   // ENTER
 	   const gEnter = this.g.enter()
 	     .append('g')
 
 	   gEnter.append('circle')
-             .attr('style', "fill: steelblue;stroke: #ccc;stroke-width: 3px;")
+	     //.attr('style', "fill: #6542a4;stroke: #ccc;stroke-width: 3px;")
+	     .attr('style', function (d) {
+	       if (d.data.results === true) {
+	         return "fill: #6542a4;stroke: #ccc;stroke-width: 3px;";
+	       } else {
+	         return "fill: #ccc;stroke: #ccc;stroke-width: 3px;";
+	       }
+	       })
              .attr('cx', function (d) { return d.x; })
              .attr('cy', function (d) { return d.y; })
 	     //.attr('r', 20)
@@ -270,7 +277,8 @@ export class Mapper2Component implements OnInit {
 	     gEnter.append('text') // center
 	     .attr('class', 'query')
              .attr('x', function (d) { return d.x; })
-             .attr('y', function (d) { return d.y-20; })
+	     //.attr('y', function (d) { return d.y-20; })
+	     .attr('y', function (d) { return d.y + ( -d.data.r -20); })
              .attr('font-size', '22px')
              .attr('text-anchor', 'middle')
 	     .text(d => d.data.q)
