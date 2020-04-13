@@ -214,7 +214,7 @@ export class Mapper2Component implements OnInit {
      console.log("root1 = ",root1)
      console.log("root1.decendants() = ",root1.descendants())
      console.log("root1.links() = ",root1.links())
-     let activeQuery = 2;
+     let activeQuery = 0;
      let lastActive = 0;
 	 // render loop here
 	 const render = (selection, { root1 }) => {
@@ -295,7 +295,7 @@ export class Mapper2Component implements OnInit {
 
 	      //const gExit = this.g.exit().transition().remove()
 
-           // Links
+      // Links
            d3.select('svg g.links')
              .selectAll('line.link')
              .data(root1.links())
@@ -307,7 +307,6 @@ export class Mapper2Component implements OnInit {
 	     .attr('y1', function (d) { return d.source.y; })
 	     .attr('x2', function (d) { return d.target.x; })
 	     .attr('y2', function (d) { return d.target.y; });
-
 	 } // eo render
 
 	 const clickOn = (d, i, n) => {
