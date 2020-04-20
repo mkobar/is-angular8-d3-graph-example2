@@ -36,7 +36,7 @@ interface HierarchyDatum {
     //encapsulation: ViewEncapsulation.None,
 })
 export class Mapper2Component implements OnInit {
-     private margin: any = { top: 20, right: 120, bottom: 20, left: 120 };
+     private margin: any = { top: 10, right: 120, bottom: 10, left: 120 };
      private width: number;
      private height: number;
      private root: HierarchyPointNode<HierarchyDatum>;
@@ -213,35 +213,39 @@ export class Mapper2Component implements OnInit {
          console.log("root1.decendants() = ",root1.descendants())
 	 console.log("root1.links() = ",root1.links())
 
-         let activeQuery = 0;
-         let lastActive = 0;
+	 let activeQuery: any = null;
+         let lastActive: any = null;
 	 // render loop here
 	 const render = (selection, { root1 }) => {
 
            // active Node
-           this.g = d3.select('svg g.nodes')
+           const gNodes = d3.select('svg g.nodes')
              .selectAll('circle.node')
 	     .data(root1.descendants())
 
            console.log("root1.decendants() = ",root1.descendants())
 
 	   // ENTER
-	   const gEnter = this.g.enter()
+	   const gEnter = gNodes.enter()
 	     .append('g')
 
 	   gEnter.append('circle')
 	     //.attr('style', "fill: #6542a4;stroke: #ccc;stroke-width: 3px;")
 	     .attr('style', function (d) {
-	       if (d.data.results === true) {
+	     console.log("style d=",d)
+	     if (d) { // because some are empty!!
+	     if (d.data.results == true) {
+	     //compiles but wrong //if (d.results === true) {
 	         return "fill: #6542a4;stroke: #ccc;stroke-width: 3px;";
 	       } else {
 	         return "fill: #ccc;stroke: #ccc;stroke-width: 3px;";
-	       }
+		 }
+		 }
 	       })
              .attr('cx', function (d) { return d.x; })
              .attr('cy', function (d) { return d.y; })
 	     //.attr('r', 20)
-	     .merge(this.g)
+	     .merge(gNodes)
 	     //.attr('r', function (d) { return d.data.r} )
 	     .attr('r', function (d) {
 	       console.log("d.data.r=",d.data.r);
@@ -284,9 +288,9 @@ export class Mapper2Component implements OnInit {
 	     .text(d => d.data.q)
 
 	     // UPDATE
-             var gUpdate = gEnter.merge(this.g);
+	     //var gUpdate = gEnter.merge(gNodes);
 	     /***
-	     const gUpdate = this.g
+	     const gUpdate = gNodes
 	     .attr('r', function (d) { return d.data.r} )
 	     **/
 	     /***
@@ -320,11 +324,19 @@ export class Mapper2Component implements OnInit {
 	 const clickOn = (d, i, n) => {
 	   d.data.r = 40
 	   console.log("clicked =",d.data.name)
+	   console.log("d=",d)
+	   console.log("i=",i)
+	   console.log("n=",n)
 	   lastActive = activeQuery;
-	   activeQuery = i;
+	   activeQuery = d;
+	   d.data.results = true
 	   //root1.descendants()[i].Node.data.r = 20;
-	   root1.descendants()[lastActive].data.r = 20;
-	   console.log("old-clicked =",root1.descendants()[lastActive].data.name)
+	   //root1.descendants()[lastActive].data.r = 20;
+	   if (lastActive != null) {
+	       lastActive.data.r = 20;
+	       console.log("old-clicked =",lastActive.data.name)
+	   }
+	   //console.log("old-clicked =",root1.descendants()[lastActive].data.name)
            console.log("root1.decendants() = ",root1.descendants())
            console.log("root1 = ",root1)
 	   //render(this.svg, {this.root});
