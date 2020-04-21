@@ -233,8 +233,8 @@ export class Mapper2Component implements OnInit {
 	     //.attr('style', "fill: #6542a4;stroke: #ccc;stroke-width: 3px;")
 	     .attr('style', function (d) {
 	     console.log("style d=",d)
-	     if (d) { // because some are empty!!
-	     if (d.data.results == true) {
+	     if (d && d !== {}) { // because some are empty!!
+	     if ((<Node>d).data.results === true) {
 	     //compiles but wrong //if (d.results === true) {
 	         return "fill: #6542a4;stroke: #ccc;stroke-width: 3px;";
 	       } else {
