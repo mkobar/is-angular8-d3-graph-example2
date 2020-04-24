@@ -20,7 +20,7 @@ function createGraph(DATA) {
     choice = mycolor
     d3.selectAll("line").remove()
     d3.selectAll("path").remove()
-    update(d); 
+    update(d, false); 
   }
 
   // When the button is changed, run the updateChart function
@@ -72,10 +72,10 @@ function createGraph(DATA) {
     toggle(root.children[9]);
     toggle(root.children[9].children[0]);
 
-    update(root);
+    update(root, false);
   //END INIT
 
-  function update(source) {
+  function update(source, selected) {
     
     var duration = d3.event && d3.event.altKey ? 5000 : 500;
 
@@ -95,7 +95,7 @@ function createGraph(DATA) {
         .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
         .on("click", function(d) { 
           d3.selectAll("line").remove()
-          toggle(d); update(d); 
+          toggle(d); update(d, true); 
         });
 
     nodeEnter.append("svg:circle")
@@ -115,9 +115,30 @@ function createGraph(DATA) {
         .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
 
     nodeUpdate.select("circle")
-        .attr("r", 6)
-        .style("fill", function(d) { return d._children ? "blue" : "lightsteelblue"; })
-        .style("stroke", "blue")
+        .attr("r", (d) => {
+          if (selected){
+            if (d.name == source.name){
+              return 20
+            }
+          }
+          return 6
+        })
+        .style("fill", (d) => { 
+          if (selected){
+            if (d.name == source.name){
+              return "purple"
+            }
+          }
+          return d._children ? "blue" : "lightsteelblue"; 
+        })
+        .style("stroke", (d) => {
+          if (selected){
+            if (d.name == source.name){
+              return "lightsteelblue"
+            }
+          }
+          return "blue"
+        })
         .style("stroke-width", 2);
 
     nodeUpdate.select("text")
