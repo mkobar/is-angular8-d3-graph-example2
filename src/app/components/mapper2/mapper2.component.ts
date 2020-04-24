@@ -198,20 +198,20 @@ export class Mapper2Component implements OnInit {
      } // initSvg
 
     initTree() {
-         console.log("flare inside", this.data);
+         // console.log("flare inside", this.data);
 	 this.tree = tree<HierarchyDatum>();
 
-         console.log(this.tree)
+         // console.log(this.tree)
          this.tree.size([this.height, this.width]);
 	 this.root = this.tree(hierarchy<HierarchyDatum>(this.data));
-         console.log(this.root)
+         // console.log(this.root)
      } // initTree
 
      private drawTree(root1: HierarchyPointNode<HierarchyDatum>) {
 
-         console.log("root1 = ",root1)
-         console.log("root1.decendants() = ",root1.descendants())
-	 console.log("root1.links() = ",root1.links())
+         // console.log("root1 = ",root1)
+         // console.log("root1.decendants() = ",root1.descendants())
+	 // console.log("root1.links() = ",root1.links())
 
 	 let activeQuery: any = null;
          let lastActive: any = null;
@@ -223,7 +223,7 @@ export class Mapper2Component implements OnInit {
              .selectAll('circle.node')
 	     .data(root1.descendants())
 
-           console.log("root1.decendants() = ",root1.descendants())
+           // console.log("root1.decendants() = ",root1.descendants())
 
 	   // ENTER
 	   const gEnter = gNodes.enter()
@@ -232,14 +232,14 @@ export class Mapper2Component implements OnInit {
 	   gEnter.append('circle')
 	     //.attr('style', "fill: #6542a4;stroke: #ccc;stroke-width: 3px;")
 	     .attr('style', function (d) {
-	     console.log("style d=",d)
+	     // console.log("style d=",d)
 	     if (d && d !== {}) { // because some are empty!!
-	     if ((<Node>d).data.results === true) {
-	     //compiles but wrong //if (d.results === true) {
-	         return "fill: #6542a4;stroke: #ccc;stroke-width: 3px;";
-	       } else {
+	    //  if ((<Node>d).data.results === true) {
+	    //  //compiles but wrong //if (d.results === true) {
+	    //      return "fill: #6542a4;stroke: #ccc;stroke-width: 3px;";
+	    //    } else {
 	         return "fill: #ccc;stroke: #ccc;stroke-width: 3px;";
-		 }
+		//  }
 		 }
 	       })
              .attr('cx', function (d) { return d.x; })
@@ -248,18 +248,18 @@ export class Mapper2Component implements OnInit {
 	     .merge(gNodes)
 	     //.attr('r', function (d) { return d.data.r} )
 	     .attr('r', function (d) {
-	       console.log("d.data.r=",d.data.r);
+	       // console.log("d.data.r=",d.data.r);
 	       return d.data.r} )
 	     /***
 	     .attr('r', function (d,i) {
 	     if (i === activeQuery) {
-	        console.log("i=",i);
-		console.log("activeQuery=", activeQuery);
+	        // console.log("i=",i);
+		// console.log("activeQuery=", activeQuery);
 	        return 40;
 		//} else {
 		}
 	     if (i === lastActive) {
-	        console.log("i2=",i);
+	        // console.log("i2=",i);
 	        return 20;
 		}
 		})
@@ -296,11 +296,11 @@ export class Mapper2Component implements OnInit {
 	     /***
      	     .attr('r', function (d,i) {
              if (i === activeQuery) {
-	        console.log("i3=",i);
-		console.log("activeQuery3=", activeQuery);
+	        // console.log("i3=",i);
+		// console.log("activeQuery3=", activeQuery);
 	        return 40;
 	      } else {
-	        console.log("i4=",i);
+	        // console.log("i4=",i);
 	        return 20;
 		}})
 		***/
@@ -323,10 +323,10 @@ export class Mapper2Component implements OnInit {
 
 	 const clickOn = (d, i, n) => {
 	   d.data.r = 40
-	   console.log("clicked =",d.data.name)
-	   console.log("d=",d)
-	   console.log("i=",i)
-	   console.log("n=",n)
+	   // console.log("clicked =",d.data.name)
+	   // console.log("d=",d)
+	   // console.log("i=",i)
+	   // console.log("n=",n)
 	   lastActive = activeQuery;
 	   activeQuery = d;
 	   d.data.results = true
@@ -334,11 +334,11 @@ export class Mapper2Component implements OnInit {
 	   //root1.descendants()[lastActive].data.r = 20;
 	   if (lastActive != null) {
 	       lastActive.data.r = 20;
-	       console.log("old-clicked =",lastActive.data.name)
+	       // console.log("old-clicked =",lastActive.data.name)
 	   }
-	   //console.log("old-clicked =",root1.descendants()[lastActive].data.name)
-           console.log("root1.decendants() = ",root1.descendants())
-           console.log("root1 = ",root1)
+	   //// console.log("old-clicked =",root1.descendants()[lastActive].data.name)
+           // console.log("root1.decendants() = ",root1.descendants())
+           // console.log("root1 = ",root1)
 	   //render(this.svg, {this.root});
 	   render(this.svg, {root1});
            //this.drawTree(this.root);
@@ -357,11 +357,11 @@ export class Mapper2Component implements OnInit {
     //let treeData = this.treeLayout(source);
     //let treeData = this.treeLayout;
     let treeData = source;
-    console.log(treeData)
+    // console.log(treeData)
     let nodes = treeData.descendants();
-    console.log(nodes)
+    // console.log(nodes)
     let links = treeData.descendants().slice(1);
-    console.log(links)
+    // console.log(links)
 
     nodes.forEach(d => d.y = d.depth * 180);
 
@@ -450,7 +450,7 @@ click(d) {
   //d3.json('../../assets/flare.json').then(data => {
   //d3.json('../../assets/flare.json').then(function(data) {
 
-  //console.log(data)
+  //// console.log(data)
 	//this.root = d3.hierarchy(data, (d) => d.children);
 	//this.root = d3.hierarchy(data);
 	//this.root2 = d3.hierarchy({
