@@ -9,6 +9,7 @@ import { PieChartComponent } from './components/pie-chart/pie-chart.component';
 import { BarChartComponent } from './components/bar-chart/bar-chart.component';
 
 import { MapTreeService } from './service/map-tree.service';
+import { HorizontalChartComponent } from './components/horizontal-chart/horizontal-chart.component';
 
 
 @NgModule({
@@ -16,7 +17,8 @@ import { MapTreeService } from './service/map-tree.service';
     AppComponent,
     Mapper2Component,
     PieChartComponent,
-    BarChartComponent
+    BarChartComponent,
+    HorizontalChartComponent
   ],
   imports: [
     BrowserModule,
