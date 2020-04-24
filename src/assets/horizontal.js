@@ -1,4 +1,40 @@
 function createGraph(DATA) {
+  
+  var allGroup = ["Line", "Diagonal"]
+
+  // Initialize the button
+  var dropdownButton = d3.select("#options")
+    .append('select')
+
+  dropdownButton // Add a button
+    .selectAll('myOptions') // Next 4 lines add 6 options = 6 colors
+    .data(allGroup)
+    .enter()
+    .append('option')
+    .text(function (d) { return d; }) // text showed in the menu
+    .attr("value", function (d) { return d; }) // corresponding value returned by the button
+
+  var choice = 'Line'
+  // A function that update the color of the circle
+  function updateChart(mycolor) {
+    choice = mycolor
+    d3.selectAll("line").remove()
+    d3.selectAll("path").remove()
+    update(d); 
+  }
+
+  // When the button is changed, run the updateChart function
+  dropdownButton.on("change", function(d) {
+
+    // recover the option that has been chosen
+    var selectedOption = d3.select(this).property("value")
+
+    // run the updateChart function with this selected option
+    updateChart(selectedOption)
+  })
+
+
+
   var m = [20, 120, 20, 120],
       w = 1280 - m[1] - m[3],
       h = 800 - m[0] - m[2],
@@ -40,6 +76,7 @@ function createGraph(DATA) {
   //END INIT
 
   function update(source) {
+    
     var duration = d3.event && d3.event.altKey ? 5000 : 500;
 
     // Compute the new tree layout.
@@ -56,7 +93,10 @@ function createGraph(DATA) {
     var nodeEnter = node.enter().append("svg:g")
         .attr("class", "node")
         .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-        .on("click", function(d) { toggle(d); update(d); });
+        .on("click", function(d) { 
+          d3.selectAll("line").remove()
+          toggle(d); update(d); 
+        });
 
     nodeEnter.append("svg:circle")
         .attr("r", 1e-6)
@@ -95,38 +135,108 @@ function createGraph(DATA) {
     nodeExit.select("text")
         .style("fill-opacity", 1e-6);
 
+
     // Update the links…
     var link = vis.selectAll("path.link")
         .data(tree.links(nodes), function(d) { return d.target.id; });
 
-    // Enter any new links at the parent's previous position.
-    link.enter().insert("svg:path", "g")
-        .attr("class", "link")
-        .attr("d", function(d) {
-          console.log(d)
-          var o = {x: source.x0, y: source.y0};
-          return diagonal({source: o, target: o});
-        })
+
+    if (choice === 'Diagonal')
+    {
+      console.log(choice)
+      // Enter any new links at the parent's previous position.
+      link.enter().insert("svg:path", "g")
+          .attr("class", "link")
+          .attr("d", function(d) {
+            var o = {x: source.x0, y: source.y0};
+            return diagonal({source: o, target: o});
+          })
         .style("fill", "none")
         .style("stroke", "#80b8ff")
         .style("stroke-width", 1.5)
-      .transition()
-        .duration(duration)
-        .attr("d", diagonal);
+        .transition()
+          .duration(duration)
+          .attr("d", diagonal);
 
-    // Transition links to their new position.
-    link.transition()
-        .duration(duration)
-        .attr("d", diagonal);
+      // Transition links to their new position.
+      link.transition()
+          .duration(duration)
+          .attr("d", diagonal);
 
-    // Transition exiting nodes to the parent's new position.
-    link.exit().transition()
-        .duration(duration)
-        .attr("d", function(d) {
-          var o = {x: source.x, y: source.y};
-          return diagonal({source: o, target: o});
-        })
-        .remove();
+      // Transition exiting nodes to the parent's new position.
+      link.exit().transition()
+          .duration(duration)
+          .attr("d", function(d) {
+            var o = {x: source.x, y: source.y};
+            return diagonal({source: o, target: o});
+          })
+          .remove();
+    }
+    if (choice === "Line") {
+      link.enter().insert("svg:line", "g")
+          .attr("class", "link")
+          .attr("x1", function(d) {
+            return d.source.y;
+          })
+          .attr("y1", function(d) {
+            return d.source.x;
+          })
+          .attr("x2", function(d) {
+            return d.target.y;
+          })
+          .attr("y2", function(d) {
+            return d.target.x;
+          })
+          .style("fill", "none")
+          .style("stroke", "#80b8ff")
+          .style("stroke-width", 1.5)
+          // .transition()
+          //   .duration(duration)
+          //   .attr("x1", function(d) {
+          //     return d.source.y;
+          //   })
+          //   .attr("y1", function(d) {
+          //     return d.source.x;
+          //   })
+          //   .attr("x2", function(d) {
+          //     return d.target.y;
+          //   })
+          //   .attr("y2", function(d) {
+          //     return d.target.x;
+          //   });
+
+      link.transition()
+          .duration(duration)
+          // .attr("d", diagonal);
+          .attr("x1", function(d) {
+            return d.source.y;
+          })
+          .attr("y1", function(d) {
+            return d.source.x;
+          })
+          .attr("x2", function(d) {
+            return d.target.y;
+          })
+          .attr("y2", function(d) {
+            return d.target.x;
+          });
+
+      link.exit().transition()
+          .duration(duration)
+          .attr("x1", function(d) {
+            return d.source.y;
+          })
+          .attr("y1", function(d) {
+            return d.source.x;
+          })
+          .attr("x2", function(d) {
+            return d.target.y;
+          })
+          .attr("y2", function(d) {
+            return d.target.x;
+          })
+          .remove();
+    }
 
     // Stash the old positions for transition.
     nodes.forEach(function(d) {
