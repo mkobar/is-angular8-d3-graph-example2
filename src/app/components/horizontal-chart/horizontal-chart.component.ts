@@ -46,10 +46,10 @@ export class HorizontalChartComponent implements OnInit {
       ]
      },
      {
-      "name": "display",
+      "name": "B3 display",
      },
      {
-      "name": "physics",
+      "name": "B4 physics",
      }
     ]
    };
