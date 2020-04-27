@@ -11,6 +11,7 @@ export class HorizontalChartComponent implements OnInit {
   svg;
   data = {
     "name": "flare",
+    // "img": "E:/Projects/project - company/D3 - mkobar/is-angular8-d3-graph-example2/src/assets/flagged-24",
     "children": [
      {
       "name": "analytics",
