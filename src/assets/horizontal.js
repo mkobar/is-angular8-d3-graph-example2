@@ -1,5 +1,7 @@
 function createGraph(DATA) {
   
+  var list = []
+
   var allGroup = ["Line", "Diagonal"]
 
   // Initialize the button
@@ -84,31 +86,81 @@ function createGraph(DATA) {
     var nodes = tree.nodes(root).reverse();
 
     // Normalize for fixed-depth.
-    nodes.forEach(function(d) { d.y = d.depth * 180; });
+    nodes.forEach(function(d) { d.y = d.depth * 350; });
 
     // Update the nodes…
     var node = vis.selectAll("g.node")
-        .data(nodes, function(d) { return d.id || (d.id = ++i); });
+        .data(nodes, function(d) { 
+          return d.id || (d.id = ++i);
+        });
 
+        
     // Enter any new nodes at the parent's previous position.
     var nodeEnter = node.enter().append("svg:g")
         .attr("class", "node")
-        .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-        .on("click", function(d) { 
-          d3.selectAll("line").remove()
-          toggle(d); update(d, true); 
-        });
+        .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; });
 
     nodeEnter.append("svg:circle")
         .attr("r", 1e-6)
-        .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+        .style("fill", function(d) { 
+          return d._children ? "lightsteelblue" : "#fff"; 
+        })
+        .on("click", function(d) { 
+          // if(!list.includes(d.name)){
+            d3.selectAll("line").remove()
+            toggle(d); update(d, true); 
+          // }
+        });
+
+    nodeEnter.append("svg:image")
+        .attr("xlink:href",  function(d) {
+            return "https://www.rawshorts.com/freeicons/wp-content/uploads/2017/01/green_webpict50_1484337222-1.png"
+        })
+        .attr("x", function(d) { return -13;})
+        .attr("y", function(d) { return -14;})
+        .attr("height", 30)
+        .attr("width", 30)
+        .on("click", function(d) { 
+          // if(!list.includes(d.name)){
+            d3.selectAll("line").remove()
+            toggle(d); update(d, true); 
+          // }
+        });
+
+    nodeEnter.append("svg:rect")
+        .attr("x", function(d) { 
+          // return d.children || d._children ? -(d.name.length * 8.99) : 10; 
+          return d.children || d._children ? -(d.name.length * 12) : 16; 
+        })
+        .attr("y", function(d) { return d.children || d._children ? -10 : -10; })
+        .attr("width", (d) => {
+          return d.name.length * 10
+        })
+        .attr("height", 20)
+        .style("fill", "#FFFF00")
+        .on("click", function(d) { 
+          if(list.includes(d.name))
+            list.splice(list.indexOf(d.name), 1);
+          else
+            list.push(d.name);
+        });
 
     nodeEnter.append("svg:text")
-        .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
+        .attr("x", function(d) { 
+          // return d.children || d._children ? -10 : 10; 
+          return d.children || d._children ? -20 : 15; 
+        })
         .attr("dy", ".35em")
         .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
         .text(function(d) { return d.name; })
-        .style("fill-opacity", 1e-6);
+        .style("fill-opacity", 1e-6)
+        .on("click", function(d) { 
+          if(list.includes(d.name))
+            list.splice(list.indexOf(d.name), 1);
+          else
+            list.push(d.name);
+        });
+        
 
     // Transition nodes to their new position.
     var nodeUpdate = node.transition()
@@ -122,7 +174,7 @@ function createGraph(DATA) {
               return 20
             }
           }
-          return 6
+          return 15
         })
         .style("fill", (d) => { 
           if (selected){
@@ -269,6 +321,10 @@ function createGraph(DATA) {
 
   // Toggle children.
   function toggle(d) {
+    // the following if will act as a switch, you won't be able to collapse unless you click the label
+    if (d.children && list.includes(d.name)){
+      return
+    }
     if (d.children) {
       d._children = d.children;
       d.children = null;
