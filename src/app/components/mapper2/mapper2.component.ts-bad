@@ -234,12 +234,12 @@ export class Mapper2Component implements OnInit {
 	     .attr('style', function (d) {
 	     // console.log("style d=",d)
 	     if (d && d !== {}) { // because some are empty!!
-	    //  if ((<Node>d).data.results === true) {
+	      if ((<Node>d).data.results === true) {
 	    //  //compiles but wrong //if (d.results === true) {
 	    //      return "fill: #6542a4;stroke: #ccc;stroke-width: 3px;";
 	    //    } else {
 	         return "fill: #ccc;stroke: #ccc;stroke-width: 3px;";
-		//  }
+		  }
 		 }
 	       })
              .attr('cx', function (d) { return d.x; })

@@ -69,12 +69,13 @@ function createGraph(DATA) {
 
     // Initialize the display to show a few nodes.
     root.children.forEach(toggleAll);
+    toggle(root.children[0]);
+    toggle(root.children[0].children[1]);
     toggle(root.children[1]);
     toggle(root.children[1].children[2]);
-    toggle(root.children[9]);
-    toggle(root.children[9].children[0]);
 
-    update(root, false);
+    //update(root, false);
+    update(root, true);
   //END INIT
 
   function update(source, selected) {

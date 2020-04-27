@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 
 import { AppComponent } from './app.component';
-import { Mapper2Component } from './components/mapper2/mapper2.component';
+//import { Mapper2Component } from './components/mapper2/mapper2.component';
 import { PieChartComponent } from './components/pie-chart/pie-chart.component';
 import { BarChartComponent } from './components/bar-chart/bar-chart.component';
 
@@ -15,7 +15,7 @@ import { HorizontalChartComponent } from './components/horizontal-chart/horizont
 @NgModule({
   declarations: [
     AppComponent,
-    Mapper2Component,
+    //Mapper2Component,
     PieChartComponent,
     BarChartComponent,
     HorizontalChartComponent
