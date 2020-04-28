@@ -85,7 +85,6 @@ function createGraph(DATA) {
     // Compute the new tree layout.
     var nodes = tree.nodes(root).reverse();
 
-    // Normalize for fixed-depth.
     nodes.forEach(function(d) { d.y = d.depth * 350; });
 
     // Update the nodes…
@@ -105,12 +104,12 @@ function createGraph(DATA) {
         .style("fill", function(d) { 
           return d._children ? "lightsteelblue" : "#fff"; 
         })
-        .on("click", function(d) { 
-          // if(!list.includes(d.name)){
-            d3.selectAll("line").remove()
-            toggle(d); update(d, true); 
-          // }
-        });
+        // .on("click", function(d) { 
+        //   // if(!list.includes(d.name)){
+        //     d3.selectAll("line").remove()
+        //     toggle(d); update(d, true); 
+        //   // }
+        // });
 
     nodeEnter.append("svg:image")
         .attr("xlink:href",  function(d) {
@@ -120,12 +119,12 @@ function createGraph(DATA) {
         .attr("y", function(d) { return -14;})
         .attr("height", 30)
         .attr("width", 30)
-        .on("click", function(d) { 
-          // if(!list.includes(d.name)){
-            d3.selectAll("line").remove()
-            toggle(d); update(d, true); 
-          // }
-        });
+        // .on("click", function(d) { 
+        //   // if(!list.includes(d.name)){
+        //     d3.selectAll("line").remove()
+        //     toggle(d); update(d, true); 
+        //   // }
+        // });
 
     nodeEnter.append("svg:rect")
         .attr("x", function(d) { 
@@ -322,9 +321,9 @@ function createGraph(DATA) {
   // Toggle children.
   function toggle(d) {
     // the following if will act as a switch, you won't be able to collapse unless you click the label
-    if (d.children && list.includes(d.name)){
-      return
-    }
+    // if (d.children && list.includes(d.name)){
+    //   return
+    // }
     if (d.children) {
       d._children = d.children;
       d.children = null;
