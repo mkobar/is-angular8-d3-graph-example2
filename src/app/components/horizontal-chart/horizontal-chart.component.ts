@@ -8,8 +8,10 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./horizontal-chart.component.css']
 })
 export class HorizontalChartComponent implements OnInit {
+
   svg;
   selected;
+  tempData;
   data = {
     "name": "A1 cars",
     "flag": true,
@@ -98,21 +100,91 @@ export class HorizontalChartComponent implements OnInit {
 
     // createGraph(this.data)
     var t = this
+    // t.tempData = t.data
+    t.tempData = Object.assign({}, t.data);
     t.drawGraph(t)
 
   }
 
+  patharr = []
+  finalPath = []
+  selectedNode;
+  
+  path(obj, value){
+    // console.log(obj)
+    // console.log(this.patharr)
+
+    if (this.patharr.length == 0){
+      this.patharr.push('root')
+    }
+
+    if(obj.name == value){
+      // console.log(name)
+      // console.log(value)
+      this.finalPath = [...this.patharr]
+      console.log('final path', this.finalPath)
+    }
+    else if (obj.children){
+      for (let j = 0; j < obj.children.length; j++){
+        // console.log('looooop: ',j)
+        if (this.patharr.length != 0){
+          this.patharr.push(j)
+        }
+        if (this.finalPath.length == 0)
+          this.path(obj.children[j], value);
+      }
+    }
+    this.patharr.pop()
+
+    return ;
+  };
+
   // CLICK EVENT HERE
 
   nodeClickEvent(d) {
-    console.log(d)
-    this.data.children[0].children.push(
-      {"name": "New node", "size": 1983}
-    )
+    this.selectedNode = d
+    this.patharr = []
+    this.finalPath = []
+    // console.log(d)
+    // this.tempData.children[0].children.push(
+    //   {"name": "New node", "flag": true, "size": 1983}
+    // )
+    if (d.parent){
+      this.path(this.tempData, d.name)
+
+      console.log(this.finalPath)
+      var a;
+      var a1;
+
+      a = this.tempData
+      for (let i = 1; i < this.finalPath.length; i++){
+        a1 = a.children[this.finalPath[i]]
+        a = a1
+      }
+      // console.log(a)
+      
+      if (a.children){
+        for (let i = 0; i < a.children.length; i++){
+          if (a.children[i].children){
+            a.children[i].children = []
+          }
+        }
+      }
+      
+      a = this.tempData
+      for (let i = 1; i < this.finalPath.length-1; i++){
+        a1 = a.children[this.finalPath[i]]
+        a = a1
+      }
+      // console.log(a)
+      a.children = []
+      a.children.push(d)
+
+    }
   }
 
   drawGraph(t) {
-    var DATA = t.data
+    var DATA = t.tempData
     
     function nodeClicked(d) {
       t.nodeClickEvent(d)
@@ -228,6 +300,19 @@ export class HorizontalChartComponent implements OnInit {
             return d._children ? "lightsteelblue" : "#fff"; 
           })
           .on("click", function(d) { 
+            // if (t.selectedNode == d){
+            //   d3.selectAll("line").remove()
+            //   d3.selectAll("path").remove()
+            //   d3.selectAll("node").remove()
+              
+            //   DATA = {}
+            //   DATA = Object.assign({}, t.data);
+            //   console.log(DATA)
+            //   update(DATA, false)
+            // }
+            // else{
+            //   nodeClicked(d)
+            // }
             nodeClicked(d)
             // if(!list.includes(d.name)){
               // d3.selectAll("line").remove()
@@ -245,6 +330,19 @@ export class HorizontalChartComponent implements OnInit {
           .attr("height", 30)
           .attr("width", 30)
           .on("click", function(d) {
+            // if (t.selectedNode == d){
+            //   d3.selectAll("line").remove()
+            //   d3.selectAll("path").remove()
+            //   d3.selectAll("node").remove()
+              
+            //   DATA = {}
+            //   DATA = Object.assign({}, t.data);
+            //   console.log(DATA)
+            //   update(DATA, false)
+            // }
+            // else{
+            //   nodeClicked(d)
+            // }
             nodeClicked(d)
             // if(!list.includes(d.name)){
               // d3.selectAll("line").remove()
