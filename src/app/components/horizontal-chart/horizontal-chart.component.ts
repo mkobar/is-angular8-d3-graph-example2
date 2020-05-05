@@ -11,6 +11,7 @@ export class HorizontalChartComponent implements OnInit {
 
   svg;
   selected;
+  selectedPath;
   tempData;
   data = {
     "name": "A1 cars",
@@ -67,7 +68,19 @@ export class HorizontalChartComponent implements OnInit {
          {
            "name": "D3 cars for rent", 
            "flag": false,
-           "size": 1983
+           "size": 1983,
+           "children": [
+            {
+              "name": "E3 cars for rent", 
+              "flag": true,
+              "size": 1983
+             },
+            {
+              "name": "E4 cars for lease", 
+              "flag": false,
+              "size": 2047
+             }
+           ]
           },
          {
            "name": "D4 cars for lease", 
@@ -101,7 +114,9 @@ export class HorizontalChartComponent implements OnInit {
     // createGraph(this.data)
     var t = this
     // t.tempData = t.data
+    console.log(t.data)
     t.tempData = Object.assign({}, t.data);
+    // t.tempData = t.data
     t.drawGraph(t)
 
   }
@@ -112,6 +127,7 @@ export class HorizontalChartComponent implements OnInit {
   
   path(obj, value){
     // console.log(obj)
+    // console.log(value)
     // console.log(this.patharr)
 
     if (this.patharr.length == 0){
@@ -122,7 +138,7 @@ export class HorizontalChartComponent implements OnInit {
       // console.log(name)
       // console.log(value)
       this.finalPath = [...this.patharr]
-      console.log('final path', this.finalPath)
+      // console.log('final path', this.finalPath)
     }
     else if (obj.children){
       for (let j = 0; j < obj.children.length; j++){
@@ -184,10 +200,20 @@ export class HorizontalChartComponent implements OnInit {
   }
 
   drawGraph(t) {
-    var DATA = t.tempData
+    var DATA = Object.assign({}, t.tempData);
+    // var DATA = t.tempData
+
+    for (let i = 0; i < DATA['children'].length; i++){
+      // DATA['children'][i]['children'] = []
+      // console.log(DATA['children'][i])
+    }
     
     function nodeClicked(d) {
-      t.nodeClickEvent(d)
+      console.log(t.data)
+      // t.tempData = {}
+      // t.tempData = Object.assign({}, t.data);
+      console.log(t.tempData)
+      // t.nodeClickEvent(d)
       t.selected = d.name
       d3.selectAll("line").remove()
       d3.selectAll("path").remove()
@@ -263,11 +289,15 @@ export class HorizontalChartComponent implements OnInit {
       }
   
       // Initialize the display to show a few nodes.
-      root.children.forEach(toggleAll);
-      toggle(root.children[0]);
-      toggle(root.children[0].children[1]);
-      toggle(root.children[1]);
-      toggle(root.children[1].children[2]);
+      // root.children.forEach(toggleAll);
+      console.log(root.children)
+      for (let i = 0; i < root.children.length; i++){
+        toggle(root.children[i])
+      }
+      // toggle(root.children[0]);
+      // toggle(root.children[0].children[1]);
+      // toggle(root.children[1]);
+      // toggle(root.children[1].children[2]);
   
       //update(root, false);
       update(root, true);
@@ -299,25 +329,91 @@ export class HorizontalChartComponent implements OnInit {
           .style("fill", function(d) { 
             return d._children ? "lightsteelblue" : "#fff"; 
           })
-          .on("click", function(d) { 
-            // if (t.selectedNode == d){
-            //   d3.selectAll("line").remove()
-            //   d3.selectAll("path").remove()
-            //   d3.selectAll("node").remove()
-              
-            //   DATA = {}
-            //   DATA = Object.assign({}, t.data);
-            //   console.log(DATA)
-            //   update(DATA, false)
-            // }
-            // else{
-            //   nodeClicked(d)
-            // }
-            nodeClicked(d)
+          .on("click", function(d) {
+
+            d.toggle = false
+            // console.log(t.selected)
+            var tempPath = [...t.finalPath]
+            t.patharr = []
+            t.finalPath = []
+            t.path(t.tempData, d.name)
+            console.log("Previous path: ", tempPath)
+            console.log("This node path: ", t.finalPath)
+            if (t.selected){
+              var match = true
+              for (let i = 0; i < tempPath.length; i++){
+                if (t.finalPath[i] != null){
+                  // console.log(tempPath[i])
+                  // console.log(t.finalPath[i])
+                  if (tempPath[i] != t.finalPath[i]){
+                    match = false
+                    console.log("Path matches ?: ", match)
+                    break
+                  }
+                }
+              }
+              console.log("previous selected node: ", t.selected)
+              if (!match){
+                // toggle his sibbling
+
+                var a = t.tempData
+                var a1;
+                console.log(t.finalPath)
+                for (let i = 1; i < t.finalPath.length; i++){
+                  a1 = a.children[tempPath[i]]
+                  a = a1
+                }
+                console.log("toggling this node: ", a)
+                if (a.children){
+                  toggle(a); 
+                }
+                a.toggle = false
+                // console.log("toggled this node: ", a)
+              }
+              else{
+
+              }
+            }
+            t.selected = d
+            // t.patharr = []
+            // t.finalPath = []
+            // t.path(t.tempData, t.selected.name)
+            // console.log(t.finalPath)
+            // nodeClicked(d)
+            d3.selectAll("line").remove()
+            if (d._children){
+              // console.log(d._children)
+              for (let i = 0; i < d._children.length; i++){
+                // console.log(d._children[i])
+                if (!d._children[i].toggle){
+                  toggle(d._children[i])
+                  d._children[i].toggle = true
+                  // console.log(d._children[i])
+                }
+              }
+            }
+            // console.log(t.finalPath.length)
+            // console.log(t.tempData)
+            toggle(d); 
+            console.log(t.finalPath.length)
+            if(t.finalPath.length <= 1){
+              toggle(d);
+              for (let i = 0; i < t.tempData.children.length; i++){
+                console.log(t.tempData.children[i])
+                if (t.tempData.children[i].children){
+                  toggle(t.tempData.children[i]); 
+
+                  // below line dosen't make any difference but why...???
+                  // t.tempData.children[i].toggle = false
+                }
+              }
+            }
+            update(d, true); 
             // if(!list.includes(d.name)){
               // d3.selectAll("line").remove()
               // toggle(d); update(d, true); 
             // }
+
           });
   
       nodeEnter.append("svg:image")
@@ -330,24 +426,90 @@ export class HorizontalChartComponent implements OnInit {
           .attr("height", 30)
           .attr("width", 30)
           .on("click", function(d) {
-            // if (t.selectedNode == d){
-            //   d3.selectAll("line").remove()
-            //   d3.selectAll("path").remove()
-            //   d3.selectAll("node").remove()
-              
-            //   DATA = {}
-            //   DATA = Object.assign({}, t.data);
-            //   console.log(DATA)
-            //   update(DATA, false)
-            // }
-            // else{
-            //   nodeClicked(d)
-            // }
-            nodeClicked(d)
+
+            d.toggle = false
+            // console.log(t.selected)
+            var tempPath = [...t.finalPath]
+            t.patharr = []
+            t.finalPath = []
+            t.path(t.tempData, d.name)
+            console.log("Previous path: ", tempPath)
+            console.log("This node path: ", t.finalPath)
+            if (t.selected){
+              var match = true
+              for (let i = 0; i < tempPath.length; i++){
+                if (t.finalPath[i] != null){
+                  // console.log(tempPath[i])
+                  // console.log(t.finalPath[i])
+                  if (tempPath[i] != t.finalPath[i]){
+                    match = false
+                    console.log("Path matches ?: ", match)
+                    break
+                  }
+                }
+              }
+              console.log("previous selected node: ", t.selected)
+              if (!match){
+                // toggle his sibbling
+
+                var a = t.tempData
+                var a1;
+                console.log(t.finalPath)
+                for (let i = 1; i < t.finalPath.length; i++){
+                  a1 = a.children[tempPath[i]]
+                  a = a1
+                }
+                console.log("toggling this node: ", a)
+                if (a.children){
+                  toggle(a); 
+                }
+                a.toggle = false
+                // console.log("toggled this node: ", a)
+              }
+              else{
+
+              }
+            }
+            t.selected = d
+            // t.patharr = []
+            // t.finalPath = []
+            // t.path(t.tempData, t.selected.name)
+            // console.log(t.finalPath)
+            // nodeClicked(d)
+            d3.selectAll("line").remove()
+            if (d._children){
+              // console.log(d._children)
+              for (let i = 0; i < d._children.length; i++){
+                // console.log(d._children[i])
+                if (!d._children[i].toggle){
+                  toggle(d._children[i])
+                  d._children[i].toggle = true
+                  // console.log(d._children[i])
+                }
+              }
+            }
+            // console.log(t.finalPath.length)
+            // console.log(t.tempData)
+            toggle(d); 
+            console.log(t.finalPath.length)
+            if(t.finalPath.length <= 1){
+              toggle(d);
+              for (let i = 0; i < t.tempData.children.length; i++){
+                console.log(t.tempData.children[i])
+                if (t.tempData.children[i].children){
+                  toggle(t.tempData.children[i]); 
+
+                  // below line dosen't make any difference but why...???
+                  // t.tempData.children[i].toggle = false
+                }
+              }
+            }
+            update(d, true); 
             // if(!list.includes(d.name)){
               // d3.selectAll("line").remove()
               // toggle(d); update(d, true); 
             // }
+
           });
   
       nodeEnter.append("svg:rect")
@@ -392,34 +554,34 @@ export class HorizontalChartComponent implements OnInit {
   
       nodeUpdate.select("circle")
           .attr("r", (d) => {
-            // if (selected){
-            //   if (d.name == source.name){
-            //     return 20
-            //   }
-            // }
-            if (t.selected == d.name){
+            if (selected){
+              if (d.name == source.name){
+                return 20
+              }
+            }
+            else if (t.selected == d.name){
               return 25
             }
             return 15
           })
           .style("fill", (d) => { 
-            // if (selected){
-            //   if (d.name == source.name){
-            //     return "purple"
-            //   }
-            // }
-            if (t.selected == d.name){
+            if (selected){
+              if (d.name == source.name){
+                return "purple"
+              }
+            }
+            else if (t.selected == d.name){
               return "Purple"
             }
             return d._children ? "blue" : "lightsteelblue"; 
           })
           .style("stroke", (d) => {
-            // if (selected){
-            //   if (d.name == source.name){
-            //     return "lightsteelblue"
-            //   }
-            // }
-            if (t.selected == d.name){
+            if (selected){
+              if (d.name == source.name){
+                return "lightsteelblue"
+              }
+            }
+            else if (t.selected == d.name){
               return "lightsteelblue"
             }
             return "blue"
@@ -542,6 +704,7 @@ export class HorizontalChartComponent implements OnInit {
       // if (d.children && list.includes(d.name)){
       //   return
       // }
+      // console.log(d)
       if (d.children) {
         d._children = d.children;
         d.children = null;
