@@ -10,3 +10,14 @@ Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app w
 # demo links
 [angular and d3 tree 2.3](https://mkobar.github.io/is-angular8-d3-graph-example2/) - angular vertical d3 tree with clicks on nodes
 
+# Notes
+
+```
+npm install
+
+npm test IS NOT SUPPORTED
+npm run e2e IS NOT SUPPORTED
+npm start
+npm start -- --port=4202
+npm run deploy
+```
