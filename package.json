@@ -39,7 +39,7 @@
     "@types/node": "^6.0.60",
     "angular-cli-ghpages": "^0.6.2",
     "codelyzer": "~4.0.0",
-    "handlebars": ">=4.3.0",
+    "handlebars": ">=4.7.7",
     "ts-node": "~3.2.0",
     "tslint": "^5.7.0",
     "typescript": "2.4.2"
